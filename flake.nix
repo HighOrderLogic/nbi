@@ -6,6 +6,7 @@
   };
 
   outputs = {
+    self,
     nixpkgs,
     nixpkgs-unstable,
     nixpkgs-stable,
@@ -58,6 +59,19 @@
           };
         }))
         builtins.listToAttrs
+      ]);
+
+    packages = forEachSystem (system: pkgs:
+      {
+        stable = self.packages.${system}."${system}-stable-index";
+        unstable = self.packages.${system}."${system}-unstable-index";
+      }
+      // lib.pipe ./pkgs [
+        builtins.readDir
+        (builtins.mapAttrs (k: _:
+          pkgs.runCommand "copy-index" {} ''
+            cp ${./pkgs}/${k}/files $out
+          ''))
       ]);
   };
 }
