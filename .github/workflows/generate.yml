@@ -48,8 +48,9 @@ jobs:
       - name: Move files
         run: |
           mkdir -p ./pkgs
-          mv -f ./pkgs-new/* ./pkgs
+          mv -f --backup=never ./pkgs-new/* ./pkgs
           rm -r ./pkgs-new
+          rm -r ./pkgs/*~
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
