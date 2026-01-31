@@ -1,0 +1,33 @@
+name: Update flake.lock
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 6"
+
+jobs:
+  update-lock:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Update lock
+        id: nix-update
+        run: |
+          echo "changes<<EOF" >> $GITHUB_OUTPUT
+          nix flake update &>> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_author: GitHub Actions <actions@github.com>
+          commit_message: |
+            chore: auto update `flake.lock`
+
+            ${{ steps.nix-update.outputs.changes }}
