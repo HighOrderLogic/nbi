@@ -1,4 +1,5 @@
 name: Update flake.lock
+
 on:
   workflow_dispatch:
   schedule:
@@ -9,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      flake-lock-changed: ${{ steps.commit-flake-lock.outputs.changes_detected }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -24,6 +27,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Commit changes
+        id: commit-flake-lock
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_author: GitHub Actions <actions@github.com>
@@ -31,3 +35,10 @@ jobs:
             chore: auto update `flake.lock`
 
             ${{ steps.nix-update.outputs.changes }}
+
+  generate-files:
+    needs: update-lock
+    if: ${{ needs.update-lock.outputs.flake-lock-changed }}
+    uses: ./.github/workflows/generate.yml
+    permissions:
+      contents: write
