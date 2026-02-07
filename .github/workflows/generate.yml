@@ -44,22 +44,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
       - name: Pull changes
         run: |
           git pull
+
       - name: Download artifacts
         uses: actions/download-artifact@v7
         with:
           path: pkgs-new
+
       - name: Move files
         run: |
           mkdir -p ./pkgs
           mv -f --backup=never ./pkgs-new/* ./pkgs
           rm -r ./pkgs-new
           rm -r ./pkgs/*~
+
+      - name: Get date
+        id: get-date
+        run: |
+          echo "date=$(date -I)" >> $GITHUB_OUTPUT
+
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_author: GitHub Actions <actions@github.com>
           commit_message: |
-            chore: automatically update database
+            chore: automatically update database (${{ steps.get-date.outputs.date }})

@@ -26,13 +26,18 @@ jobs:
           nix flake update &>> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Get date
+        id: get-date
+        run: |
+          echo "date=$(date -I)" >> $GITHUB_OUTPUT
+
       - name: Commit changes
         id: commit-flake-lock
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_author: GitHub Actions <actions@github.com>
           commit_message: |
-            chore: auto update `flake.lock`
+            chore: auto update `flake.lock` (${{ steps.get-date.outputs.date }})
 
             ${{ steps.nix-update.outputs.changes }}
 
